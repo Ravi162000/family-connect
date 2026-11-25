@@ -19,6 +19,9 @@
     --amber-soft: #FEF3C7;
     --red: #DC2626;
     --red-soft: #FEE2E2;
+    --chat-bg: #EAE6DF;
+    --chat-me: #D9FDD3;
+    --chat-other: #FFFFFF;
     --radius: 16px;
   }
   body.dark {
@@ -35,19 +38,22 @@
     --amber-soft: #451A03;
     --red: #F87171;
     --red-soft: #450A0A;
+    --chat-bg: #0B141A;
+    --chat-me: #005C4B;
+    --chat-other: #202C33;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--text); padding-bottom: 84px;
+    background: var(--bg); color: var(--text); padding-bottom: 78px;
   }
   .topbar {
     position: sticky; top: 0; z-index: 20; background: var(--primary); color: #fff;
-    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 16px; display: flex; align-items: center; justify-content: space-between;
     box-shadow: 0 2px 10px rgba(0,0,0,0.12);
   }
-  .topbar h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
-  .topbar small { display: block; font-size: 11px; opacity: 0.85; }
+  .topbar h1 { margin: 0; font-size: 18px; font-weight: 700; }
+  .topbar small { display: block; font-size: 11px; opacity: 0.88; }
   .top-actions { display: flex; gap: 8px; }
   .icon-btn {
     border: none; background: rgba(255,255,255,0.18); color: #fff; border-radius: 10px;
@@ -87,21 +93,30 @@
   .pill.bad { background: var(--red-soft); color: var(--red); border-color: transparent; }
   .loc-box {
     background: var(--bg); border-radius: 12px; padding: 10px 12px; font-size: 13px;
-    display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;
   }
-  .btn-row { display: flex; gap: 8px; }
+  .usage-box {
+    background: var(--bg); border-radius: 12px; padding: 9px 12px; font-size: 12px; margin-bottom: 10px;
+  }
+  .usage-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .usage-chip {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 3px 8px; font-size: 11px; font-weight: 600;
+  }
+  .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
   .btn {
-    flex: 1; border: none; border-radius: 12px; padding: 10px 12px; font-size: 13px;
-    font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    flex: 1; border: none; border-radius: 11px; padding: 9px 10px; font-size: 12px;
+    font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 72px;
   }
   .btn-primary { background: var(--primary); color: #fff; }
   .btn-green { background: #16A34A; color: #fff; }
+  .btn-purple { background: #7C3AED; color: #fff; }
   .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
   .btn-danger { background: var(--red); color: #fff; }
-  .btn-sm { padding: 7px 10px; font-size: 12px; flex: 0 0 auto; }
+  .btn-sm { padding: 7px 10px; font-size: 12px; flex: 0 0 auto; min-width: auto; }
   .sos-trigger {
-    width: 100%; padding: 12px; border-radius: 14px; border: 2px solid var(--red);
-    background: var(--red-soft); color: var(--red); font-weight: 800; font-size: 15px;
+    width: 100%; padding: 11px; border-radius: 14px; border: 2px solid var(--red);
+    background: var(--red-soft); color: var(--red); font-weight: 800; font-size: 14px;
     cursor: pointer; margin-bottom: 12px;
   }
   .nav {
@@ -109,8 +124,8 @@
     border-top: 1px solid var(--border); display: flex; z-index: 30;
   }
   .nav button {
-    flex: 1; border: none; background: transparent; color: var(--muted); padding: 10px 6px;
-    font-size: 12px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    flex: 1; border: none; background: transparent; color: var(--muted); padding: 9px 4px;
+    font-size: 11px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px;
   }
   .nav button.active { color: var(--primary); }
   .nav span.ico { font-size: 18px; }
@@ -123,20 +138,104 @@
   .hidden { display: none !important; }
   .perm-row {
     display: flex; align-items: center; justify-content: space-between; padding: 10px 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); gap: 8px;
   }
   .perm-row:last-child { border-bottom: none; }
   .toast {
     position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%);
     background: #0F172A; color: #fff; padding: 10px 16px; border-radius: 999px;
-    font-size: 13px; font-weight: 600; z-index: 50; display: none;
+    font-size: 13px; font-weight: 600; z-index: 90; display: none;
   }
-  .section-title { font-size: 14px; font-weight: 800; color: var(--muted); margin: 14px 0 8px 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-title { font-size: 13px; font-weight: 800; color: var(--muted); margin: 14px 0 8px 2px; text-transform: uppercase; letter-spacing: 0.5px; }
   .contact-item {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     padding: 11px 0; border-bottom: 1px solid var(--border);
   }
   .contact-item:last-child { border-bottom: none; }
+
+  /* WhatsApp-style Group Chat */
+  .chat-wrap {
+    display: flex; flex-direction: column; height: calc(100vh - 138px); background: var(--chat-bg);
+    border-radius: 16px; overflow: hidden; border: 1px solid var(--border);
+  }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .msg-bubble {
+    max-width: 82%; padding: 8px 11px; border-radius: 14px; font-size: 14px;
+    line-height: 1.4; position: relative; word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+  .msg-me { align-self: flex-end; background: var(--chat-me); border-bottom-right-radius: 4px; }
+  .msg-other { align-self: flex-start; background: var(--chat-other); border-bottom-left-radius: 4px; }
+  .msg-sender { font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 3px; }
+  .msg-reply-quote {
+    background: rgba(0,0,0,0.06); border-left: 3px solid var(--primary); padding: 4px 8px;
+    border-radius: 6px; font-size: 11px; margin-bottom: 5px; color: var(--muted);
+  }
+  .msg-meta {
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    font-size: 10px; color: var(--muted); margin-top: 4px;
+  }
+  .msg-meta button {
+    border: none; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; padding: 0;
+  }
+  .msg-img { max-width: 100%; border-radius: 10px; margin-top: 4px; display: block; }
+  .reply-bar {
+    background: var(--card); border-top: 1px solid var(--border); padding: 6px 12px;
+    display: flex; align-items: center; justify-content: space-between; font-size: 12px;
+  }
+  .chat-input-bar {
+    background: var(--card); border-top: 1px solid var(--border); padding: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .chat-input-bar input[type="text"] {
+    flex: 1; padding: 10px 12px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); font-size: 14px; outline: none;
+  }
+  .chat-ico-btn {
+    width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--bg);
+    color: var(--text); font-size: 17px; cursor: pointer; flex-shrink: 0;
+  }
+  .chat-send-btn {
+    width: 40px; height: 40px; border-radius: 50%; border: none; background: #16A34A;
+    color: #fff; font-size: 16px; cursor: pointer; flex-shrink: 0;
+  }
+
+  .ring-banner {
+    background: #EA580C; color: #fff; border-radius: var(--radius); padding: 13px 14px;
+    margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 95;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-card {
+    width: 100%; max-width: 360px; background: var(--card); color: var(--text);
+    border-radius: 18px; padding: 18px; box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  }
+  .modal-card h3 { margin: 0 0 8px 0; font-size: 17px; }
+  .modal-card p { margin: 0 0 16px 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+  /* WebRTC Call Overlay */
+  .call-overlay {
+    position: fixed; inset: 0; background: #0B1120; color: #fff; z-index: 80;
+    display: flex; flex-direction: column; justify-content: space-between; padding: 24px 18px;
+  }
+  .call-videos {
+    position: relative; flex: 1; display: flex; align-items: center; justify-content: center;
+    margin: 14px 0; border-radius: 18px; overflow: hidden; background: #162032;
+  }
+  #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
+  #localVideo {
+    position: absolute; bottom: 12px; right: 12px; width: 105px; height: 145px;
+    object-fit: cover; border-radius: 12px; border: 2px solid #fff; background: #000;
+  }
+  .call-controls { display: flex; justify-content: center; gap: 14px; }
+  .call-circle {
+    width: 58px; height: 58px; border-radius: 50%; border: none; font-size: 22px;
+    cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center;
+  }
 </style>
 </head>
 <body>
@@ -144,7 +243,7 @@
 <div class="topbar">
   <div>
     <h1>FamilyConnect</h1>
-    <small id="topSubtitle">Family Safety & Contacts</small>
+    <small id="topSubtitle">Family Safety, Chat & Calls</small>
   </div>
   <div class="top-actions">
     <button class="icon-btn" onclick="toggleLang()" id="langBtn">हिंदी</button>
@@ -156,7 +255,7 @@
 <div class="container hidden" id="setupView">
   <div class="card">
     <h2 style="margin:0 0 6px 0;font-size:19px;" data-i18n="setupTitle">Join Your Family</h2>
-    <p class="sub" style="margin-bottom:14px;" data-i18n="setupDesc">Bas apna Naam, Phone Number aur Relation daalein aur Join Family par tap karein. Family Code pehle se set hai.</p>
+    <p class="sub" style="margin-bottom:14px;" data-i18n="setupDesc">Enter your Name, Phone Number, and Relation to join. Server & Family Code are already pre-configured.</p>
 
     <details style="margin-bottom:12px;">
       <summary style="font-size:12px;color:var(--muted);cursor:pointer;font-weight:600;">⚙️ Server & Family Code (Auto-configured)</summary>
@@ -175,14 +274,9 @@
         </div>
       </div>
     </details>
-    <div class="field">
-      <label>Your Name *</label>
-      <input id="inName" type="text" placeholder="e.g. Ravi / Papa / Mummy" />
-    </div>
-    <div class="field">
-      <label>Phone Number *</label>
-      <input id="inPhone" type="tel" placeholder="e.g. 9876543210" />
-    </div>
+
+    <div class="field"><label>Your Name *</label><input id="inName" type="text" placeholder="e.g. Ravi / Papa / Mummy" /></div>
+    <div class="field"><label>Phone Number *</label><input id="inPhone" type="tel" placeholder="e.g. 9876543210" /></div>
     <div class="field">
       <label>Relation / Role</label>
       <select id="inRole">
@@ -206,11 +300,12 @@
   <!-- TAB 1: FAMILY LIVE -->
   <div id="tabFamily">
     <div id="sosBanner" class="sos-banner hidden"></div>
+    <div id="ringBanner" class="ring-banner hidden"></div>
 
     <div class="card" style="padding:10px 14px;">
       <div class="row">
         <div>
-          <strong id="syncLabel" style="font-size:13px;">Live Sync Active</strong>
+          <strong style="font-size:13px;">Live Sync Active</strong>
           <div class="sub" id="lastSyncText">Updating...</div>
         </div>
         <button class="btn btn-primary btn-sm" onclick="refreshAll(true)">↻ Refresh</button>
@@ -218,11 +313,28 @@
     </div>
 
     <button class="sos-trigger" onclick="triggerSOS()">🚨 EMERGENCY SOS — Alert Whole Family</button>
-
     <div id="membersList"></div>
   </div>
 
-  <!-- TAB 2: CONTACTS -->
+  <!-- TAB 2: WHATSAPP-STYLE FAMILY GROUP CHAT -->
+  <div id="tabChat" class="hidden">
+    <div class="chat-wrap">
+      <div class="chat-messages" id="chatMessages"></div>
+      <div id="replyBar" class="reply-bar hidden">
+        <span id="replyPreview"></span>
+        <button class="btn btn-outline btn-sm" onclick="cancelReply()">✕</button>
+      </div>
+      <div class="chat-input-bar">
+        <input type="file" id="chatPhotoInput" accept="image/*" class="hidden" onchange="sendChatPhoto(this)" />
+        <button class="chat-ico-btn" onclick="document.getElementById('chatPhotoInput').click()" title="Send Photo">📷</button>
+        <button class="chat-ico-btn" id="voiceBtn" onclick="toggleVoiceNote()" title="Record Voice Note">🎤</button>
+        <input id="chatText" type="text" placeholder="Message family group..." onkeydown="if(event.key==='Enter')sendChatText()" />
+        <button class="chat-send-btn" onclick="sendChatText()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: CONTACTS -->
   <div id="tabContacts" class="hidden">
     <div class="card">
       <div class="row" style="margin-bottom:10px;">
@@ -260,23 +372,23 @@
     <div class="card" id="sharedContactsList"></div>
   </div>
 
-  <!-- TAB 3: SETTINGS -->
+  <!-- TAB 4: SETTINGS -->
   <div id="tabSettings" class="hidden">
     <div class="card">
       <h3 style="margin:0 0 8px 0;font-size:16px;">Invite Family Members</h3>
-      <p class="sub" style="margin-bottom:10px;">Share this invite on WhatsApp. Other members can paste it in Setup to join your family instantly.</p>
+      <p class="sub" style="margin-bottom:10px;">Share invite code on WhatsApp if someone installs a fresh copy.</p>
       <button class="btn btn-green" style="width:100%;" onclick="shareInvite()">📤 Share Family Invite Code</button>
     </div>
 
     <div class="card">
-      <h3 style="margin:0 0 8px 0;font-size:16px;">Permissions (For Background Updates)</h3>
+      <h3 style="margin:0 0 8px 0;font-size:16px;">Permissions (Location, Calls & Screen Time)</h3>
       <div id="permList"></div>
     </div>
 
     <div class="card">
       <h3 style="margin:0 0 10px 0;font-size:16px;">Sync Interval</h3>
       <div class="field">
-        <label>Auto-update Battery & Location every:</label>
+        <label>Auto-update Battery, Location & Screen Time every:</label>
         <select id="setInterval" onchange="updateInterval()">
           <option value="5">5 Minutes (Fast)</option>
           <option value="10">10 Minutes (Balanced - Recommended)</option>
@@ -292,11 +404,45 @@
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
+<!-- WEBRTC WI-FI VOICE / VIDEO CALL OVERLAY -->
+<div id="callOverlay" class="call-overlay hidden">
+  <div style="text-align:center;">
+    <h2 id="callTitle" style="margin:0 0 4px 0;font-size:20px;">Wi-Fi Call</h2>
+    <div id="callStatus" style="font-size:13px;opacity:0.85;">Connecting...</div>
+  </div>
+  <div class="call-videos">
+    <video id="remoteVideo" autoplay playsinline></video>
+    <video id="localVideo" autoplay playsinline muted class="hidden"></video>
+    <div id="voiceAvatar" style="font-size:56px;">🎙️</div>
+  </div>
+  <div class="call-controls" id="incomingControls">
+    <button class="call-circle" style="background:#16A34A;" onclick="acceptIncomingCall()">📞</button>
+    <button class="call-circle" style="background:#DC2626;" onclick="endCall()">✕</button>
+  </div>
+  <div class="call-controls hidden" id="activeCallControls">
+    <button class="call-circle" id="muteBtn" style="background:#334155;" onclick="toggleMute()">🎤</button>
+    <button class="call-circle" style="background:#DC2626;" onclick="endCall()">📵</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (4 TABS) -->
 <div class="nav hidden" id="bottomNav">
   <button id="navFamily" class="active" onclick="switchTab('family')"><span class="ico">👨‍👩‍👧‍👦</span><span data-i18n="tabFamily">Family</span></button>
+  <button id="navChat" onclick="switchTab('chat')"><span class="ico">💬</span><span data-i18n="tabChat">Chat</span></button>
   <button id="navContacts" onclick="switchTab('contacts')"><span class="ico">📞</span><span data-i18n="tabContacts">Contacts</span></button>
   <button id="navSettings" onclick="switchTab('settings')"><span class="ico">⚙️</span><span data-i18n="tabSettings">Settings</span></button>
+</div>
+
+<!-- RING CONFIRMATION MODAL (YES / NO) -->
+<div id="ringModal" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h3>🔔 Ring Phone Confirmation</h3>
+    <p id="ringModalText">Kya aap sach me is member ka phone FULL volume par ring karna chahte hain?</p>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeRingModal()">No (Cancel)</button>
+      <button class="btn btn-danger" onclick="confirmRingPhone()">Yes, Ring Now</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -306,27 +452,43 @@ const hasAndroid = typeof window.AndroidBridge !== 'undefined';
 let config = {};
 let membersData = {};
 let contactsData = {};
+let chatData = {};
 let sosData = null;
+let activeCallData = null;
+let ringData = null;
+let pendingRingTarget = null;
 let lang = localStorage.getItem('fc_lang') || 'en';
+let currentTab = 'family';
 let pollTimer = null;
+let replyTarget = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+// WebRTC state
+let pc = null;
+let localStream = null;
+let currentCallId = null;
+let isCaller = false;
+let isMuted = false;
 
 const EMERGENCY_LIST = [
-  { name: 'National Emergency (Police / Fire / Medical)', phone: '112', cat: 'Emergency' },
-  { name: 'Ambulance', phone: '108', cat: 'Emergency' },
-  { name: 'Police Helpline', phone: '100', cat: 'Emergency' },
-  { name: 'Women Helpline', phone: '1091', cat: 'Emergency' }
+  { name: 'National Emergency (Police / Fire / Medical)', phone: '112' },
+  { name: 'Ambulance', phone: '108' },
+  { name: 'Police Helpline', phone: '100' },
+  { name: 'Women Helpline', phone: '1091' }
 ];
 
 const I18N = {
   en: {
     setupTitle: 'Join Your Family',
     setupDesc: 'Enter your Name, Phone Number, and Relation to join. Server & Family Code are already pre-configured.',
-    tabFamily: 'Family', tabContacts: 'Contacts', tabSettings: 'Settings'
+    tabFamily: 'Family', tabChat: 'Chat', tabContacts: 'Contacts', tabSettings: 'Settings'
   },
   hi: {
     setupTitle: 'अपनी फैमिली से जुड़ें',
     setupDesc: 'बस अपना नाम, फोन नंबर और रिश्ता चुनें और जुड़ें। सर्वर और फैमिली कोड पहले से सेट हैं।',
-    tabFamily: 'फैमिली', tabContacts: 'कॉन्टैक्ट्स', tabSettings: 'सेटिंग्स'
+    tabFamily: 'फैमिली', tabChat: 'चैट', tabContacts: 'कॉन्टैक्ट्स', tabSettings: 'सेटिंग्स'
   }
 };
 
@@ -360,11 +522,7 @@ function applyLang() {
 }
 
 function loadConfig() {
-  if (hasAndroid) {
-    config = JSON.parse(AndroidBridge.getConfig());
-  } else {
-    config = JSON.parse(localStorage.getItem('fc_web_config') || '{}');
-  }
+  config = hasAndroid ? JSON.parse(AndroidBridge.getConfig()) : JSON.parse(localStorage.getItem('fc_web_config') || '{}');
 }
 
 function genCode() {
@@ -382,10 +540,8 @@ function pasteInvite() {
     const decoded = JSON.parse(atob(match ? match[1] : raw.trim()));
     if (decoded.url) document.getElementById('inFirebase').value = decoded.url;
     if (decoded.code) document.getElementById('inCode').value = decoded.code;
-    showToast('Invite details filled! Now enter your name & phone.');
-  } catch (e) {
-    showToast('Invalid invite code format');
-  }
+    showToast('Invite details filled!');
+  } catch (e) { showToast('Invalid invite code'); }
 }
 
 function saveSetup() {
@@ -401,7 +557,7 @@ function saveSetup() {
     return;
   }
   if (code.length < 4 || !name || !phone) {
-    showToast('Please fill Family Code, Name, and Phone');
+    showToast('Please fill Name and Phone');
     return;
   }
 
@@ -409,10 +565,7 @@ function saveSetup() {
     config = JSON.parse(AndroidBridge.saveConfig(url, code, name, phone, role, interval));
     AndroidBridge.requestCorePermissions();
   } else {
-    config = {
-      firebaseUrl: url, familyCode: code, memberId: config.memberId || ('web_' + Date.now()),
-      memberName: name, memberPhone: phone, memberRole: role, syncIntervalMin: interval, isConfigured: true
-    };
+    config = { firebaseUrl: url, familyCode: code, memberId: config.memberId || ('web_' + Date.now()), memberName: name, memberPhone: phone, memberRole: role, syncIntervalMin: interval, isConfigured: true };
     localStorage.setItem('fc_web_config', JSON.stringify(config));
   }
   showApp();
@@ -439,35 +592,30 @@ function showApp() {
   renderPermissions();
   renderEmergencyContacts();
   if (pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(() => refreshAll(false), 20000);
+  pollTimer = setInterval(() => refreshAll(false), 4000);
 }
 
 function switchTab(tab) {
-  ['family', 'contacts', 'settings'].forEach(t => {
+  currentTab = tab;
+  ['family', 'chat', 'contacts', 'settings'].forEach(t => {
     document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('hidden', t !== tab);
     document.getElementById('nav' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
   });
   if (tab === 'settings') renderPermissions();
   if (tab === 'contacts') renderContacts();
+  if (tab === 'chat') { renderChat(); scrollChatBottom(); }
 }
 
 async function uploadOwnStatus() {
   if (!config.isConfigured) return;
-  let status;
-  if (hasAndroid) {
-    status = JSON.parse(AndroidBridge.getDeviceStatus());
-  } else {
-    status = {
-      id: config.memberId, name: config.memberName, phone: config.memberPhone, role: config.memberRole,
-      batteryPct: 85, isCharging: false, chargeType: 'Battery', ringMode: 'Ring',
-      networkType: navigator.onLine ? 'Online' : 'Offline', deviceModel: 'Web Browser',
-      lat: null, lng: null, accuracy: 0, address: 'Open in Android APK for GPS', lastSeen: Date.now()
-    };
-  }
+  let status = hasAndroid ? JSON.parse(AndroidBridge.getDeviceStatus()) : {
+    id: config.memberId, name: config.memberName, phone: config.memberPhone, role: config.memberRole,
+    batteryPct: 85, isCharging: false, ringMode: 'Ring', networkType: navigator.onLine ? 'Online' : 'Offline',
+    deviceModel: 'Web Browser', lat: null, lng: null, accuracy: 0, address: 'Open in Android APK for GPS',
+    screenTimeMin: -1, topApps: [], lastSeen: Date.now()
+  };
   await fetch(`${config.firebaseUrl}/families/${config.familyCode}/members/${config.memberId}.json`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(status)
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(status)
   });
 }
 
@@ -482,14 +630,20 @@ async function refreshAll(pushOwn) {
     const data = await res.json();
     membersData = (data && data.members) ? data.members : {};
     contactsData = (data && data.contacts) ? data.contacts : {};
+    chatData = (data && data.chat) ? data.chat : {};
     sosData = (data && data.sos) ? data.sos : null;
+    activeCallData = (data && data.activeCall) ? data.activeCall : null;
+    ringData = (data && data.ringRequest) ? data.ringRequest : null;
 
     document.getElementById('lastSyncText').textContent = 'Updated: ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     renderSosBanner();
-    renderMembers();
-    renderContacts();
+    renderRingBanner();
+    if (currentTab === 'family') renderMembers();
+    if (currentTab === 'chat') renderChat();
+    if (currentTab === 'contacts') renderContacts();
+    handleCallSignaling();
   } catch (e) {
-    document.getElementById('lastSyncText').textContent = 'Offline or Firebase URL error';
+    document.getElementById('lastSyncText').textContent = 'Offline or Firebase Rules need update';
   }
 }
 
@@ -502,18 +656,24 @@ function timeAgo(ts) {
   return Math.floor(diff / 86400) + 'd ago';
 }
 
+function fmtMins(m) {
+  if (m === null || m === undefined || m < 0) return null;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return h > 0 ? `${h}h ${rem}m` : `${rem}m`;
+}
+
 function renderSosBanner() {
   const box = document.getElementById('sosBanner');
   if (!sosData || !sosData.active || (Date.now() - (sosData.timestamp || 0)) > 15 * 60 * 1000) {
-    box.classList.add('hidden');
-    return;
+    box.classList.add('hidden'); return;
   }
   box.classList.remove('hidden');
   box.innerHTML = `
     <h3>🚨 SOS ALERT — ${escapeHtml(sosData.name || 'Family Member')}</h3>
     <p>Needs urgent help! (${timeAgo(sosData.timestamp)})<br/>📍 ${escapeHtml(sosData.address || 'Location unavailable')}</p>
     <div class="btn-row">
-      <button class="btn" style="background:#fff;color:#DC2626;" onclick="callNum('${escapeAttr(sosData.phone || '')}')">📞 Call Now</button>
+      <button class="btn" style="background:#fff;color:#DC2626;" onclick="callNum('${escapeAttr(sosData.phone || '')}')">📞 Call</button>
       ${sosData.lat ? `<button class="btn" style="background:#fff;color:#1D4ED8;" onclick="openMap(${sosData.lat},${sosData.lng},'${escapeAttr(sosData.name || 'SOS')}')">🗺️ Map</button>` : ''}
       <button class="btn" style="background:rgba(0,0,0,0.25);color:#fff;" onclick="clearSOS()">✓ Clear</button>
     </div>
@@ -523,31 +683,77 @@ function renderSosBanner() {
 async function triggerSOS() {
   if (!confirm('Send EMERGENCY SOS alert with your live location to all family members?')) return;
   const st = hasAndroid ? JSON.parse(AndroidBridge.getDeviceStatus()) : { address: 'Unknown', lat: null, lng: null };
+  await fetch(`${config.firebaseUrl}/families/${config.familyCode}/sos.json`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active: true, sosId: 'sos_' + Date.now(), memberId: config.memberId, name: config.memberName, phone: config.memberPhone, lat: st.lat, lng: st.lng, address: st.address || 'Check app', timestamp: Date.now() })
+  });
+  showToast('SOS alert sent to family!');
+  refreshAll(false);
+}
+
+function ringMemberPhone(targetId, targetName) {
+  pendingRingTarget = { id: targetId, name: targetName };
+  document.getElementById('ringModalText').textContent =
+    `Kya aap sach me ${targetName} ka phone FULL volume par ring karna chahte hain? (Ye Silent mode par bhi bajega — galti se tap hua ho to No dabayein.)`;
+  document.getElementById('ringModal').classList.remove('hidden');
+}
+
+function closeRingModal() {
+  pendingRingTarget = null;
+  document.getElementById('ringModal').classList.add('hidden');
+}
+
+async function confirmRingPhone() {
+  if (!pendingRingTarget) return;
+  const target = pendingRingTarget;
+  closeRingModal();
   const payload = {
+    ringId: 'ring_' + Date.now(),
+    targetId: target.id,
+    targetName: target.name,
+    senderName: config.memberName,
     active: true,
-    sosId: 'sos_' + Date.now(),
-    memberId: config.memberId,
-    name: config.memberName,
-    phone: config.memberPhone,
-    lat: st.lat,
-    lng: st.lng,
-    address: st.address || 'Check app',
     timestamp: Date.now()
   };
-  await fetch(`${config.firebaseUrl}/families/${config.familyCode}/sos.json`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+  await fetch(`${config.firebaseUrl}/families/${config.familyCode}/ringRequest.json`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-  showToast('SOS alert sent to all family members!');
-  refreshAll(false);
+  ringData = payload;
+  renderRingBanner();
+  showToast(`Ringing ${target.name}'s phone... Stop karne ke liye upar Stop button dabayein.`);
+}
+
+async function stopRemoteRing() {
+  if (hasAndroid && AndroidBridge.stopRinging) AndroidBridge.stopRinging();
+  await fetch(`${config.firebaseUrl}/families/${config.familyCode}/ringRequest.json`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active: false })
+  });
+  ringData = null;
+  renderRingBanner();
+  showToast('Phone ring band kar diya gaya!');
+}
+
+function renderRingBanner() {
+  const box = document.getElementById('ringBanner');
+  if (!ringData || !ringData.active || (Date.now() - (ringData.timestamp || 0)) > 60000) {
+    box.classList.add('hidden');
+    return;
+  }
+  box.classList.remove('hidden');
+  const label = ringData.targetId === config.memberId
+    ? `🔔 ${escapeHtml(ringData.senderName || 'Family')} is ringing your phone!`
+    : `🔔 Ringing ${escapeHtml(ringData.targetName || 'member')}'s phone...`;
+  box.innerHTML = `
+    <div style="font-size:13px;font-weight:700;">${label}</div>
+    <button class="btn btn-sm" style="background:#fff;color:#EA580C;" onclick="stopRemoteRing()">⏹️ Stop Ring</button>
+  `;
 }
 
 async function clearSOS() {
   await fetch(`${config.firebaseUrl}/families/${config.familyCode}/sos.json`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ active: false })
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: false })
   });
   showToast('SOS cleared');
   refreshAll(false);
@@ -557,7 +763,7 @@ function renderMembers() {
   const list = document.getElementById('membersList');
   const arr = Object.values(membersData).sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
   if (!arr.length) {
-    list.innerHTML = '<div class="card"><p class="sub">No family members synced yet. Tap Refresh or share your Family Invite Code.</p></div>';
+    list.innerHTML = '<div class="card"><p class="sub">No family members synced yet. Tap Refresh.</p></div>';
     return;
   }
   list.innerHTML = arr.map(m => {
@@ -571,6 +777,9 @@ function renderMembers() {
     const ringIcon = m.ringMode === 'Silent' ? '🔕' : (m.ringMode === 'Vibrate' ? '📳' : '🔔');
     const netIcon = m.networkType === 'Wi-Fi' ? '📶' : (m.networkType === 'Mobile Data' ? '📱' : '⚠️');
     const hasCoords = m.lat !== null && m.lat !== undefined && m.lng !== null && m.lng !== undefined;
+    const stText = fmtMins(m.screenTimeMin);
+    const topApps = Array.isArray(m.topApps) ? m.topApps : [];
+    const isMe = m.id === config.memberId;
 
     return `
       <div class="card">
@@ -589,7 +798,17 @@ function renderMembers() {
           <span class="pill ${batClass}">${batIcon} ${bat !== null ? bat + '%' : '--'}${m.isCharging ? ' Charging' : ''}</span>
           <span class="pill">${ringIcon} ${escapeHtml(m.ringMode || 'Ring')}</span>
           <span class="pill">${netIcon} ${escapeHtml(m.networkType || 'Online')}</span>
+          ${stText ? `<span class="pill">📱 Today: ${stText}</span>` : ''}
         </div>
+
+        ${topApps.length ? `
+          <div class="usage-box">
+            <strong>📊 Today's App Usage (${stText || 'Active'})</strong>
+            <div class="usage-chips">
+              ${topApps.map(a => `<span class="usage-chip">${escapeHtml(a.name)}: ${fmtMins(a.min) || '1m'}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
 
         <div class="loc-box">
           <div style="flex:1;">
@@ -600,29 +819,331 @@ function renderMembers() {
         </div>
 
         <div class="btn-row">
-          <button class="btn btn-outline" onclick="callNum('${escapeAttr(m.phone || '')}')">📞 Call</button>
-          <button class="btn btn-green" onclick="waNum('${escapeAttr(m.phone || '')}')">💬 WhatsApp</button>
+          ${!isMe ? `<button class="btn btn-primary" onclick="startWebRtcCall('${escapeAttr(m.id)}','${escapeAttr(m.name || 'Member')}','voice')">🎙️ Wi-Fi Call</button>` : ''}
+          ${!isMe ? `<button class="btn btn-purple" onclick="startWebRtcCall('${escapeAttr(m.id)}','${escapeAttr(m.name || 'Member')}','video')">📹 Video</button>` : ''}
+          ${!isMe ? `<button class="btn btn-danger" onclick="ringMemberPhone('${escapeAttr(m.id)}','${escapeAttr(m.name || 'Member')}')">🔔 Ring</button>` : ''}
+          <button class="btn btn-outline" onclick="callNum('${escapeAttr(m.phone || '')}')">📞 SIM</button>
+          <button class="btn btn-green" onclick="waNum('${escapeAttr(m.phone || '')}')">💬 WA</button>
         </div>
       </div>
     `;
   }).join('');
 }
 
+// ================= WHATSAPP-STYLE GROUP CHAT =================
+let lastRenderedChatCount = 0;
+function renderChat() {
+  const box = document.getElementById('chatMessages');
+  const msgs = Object.values(chatData).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)).slice(-80);
+  if (msgs.length === lastRenderedChatCount && box.innerHTML.trim() !== '') return;
+  lastRenderedChatCount = msgs.length;
+
+  if (!msgs.length) {
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);margin-top:30px;font-size:13px;">Family Group Chat me abhi koi message nahi hai. 👋 Hi bhejein!</div>';
+    return;
+  }
+
+  box.innerHTML = msgs.map(msg => {
+    const mine = msg.senderId === config.memberId;
+    const t = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `
+      <div class="msg-bubble ${mine ? 'msg-me' : 'msg-other'}">
+        ${!mine ? `<div class="msg-sender">${escapeHtml(msg.senderName || 'Member')} (${escapeHtml(msg.senderRole || 'Family')})</div>` : ''}
+        ${msg.replyTo ? `<div class="msg-reply-quote"><strong>${escapeHtml(msg.replyTo.senderName)}</strong>: ${escapeHtml(msg.replyTo.snippet)}</div>` : ''}
+        ${msg.text ? `<div>${escapeHtml(msg.text)}</div>` : ''}
+        ${msg.image ? `<img class="msg-img" src="${msg.image}" />` : ''}
+        ${msg.audio ? `<audio controls style="max-width:220px;height:36px;margin-top:4px;" src="${msg.audio}"></audio>` : ''}
+        <div class="msg-meta">
+          <button onclick="setReply('${escapeAttr(msg.id)}','${escapeAttr(msg.senderName || 'Member')}','${escapeAttr((msg.text || (msg.image ? '📷 Photo' : '🎤 Voice')).slice(0, 45))}')">↩ Reply</button>
+          ${mine ? `<button onclick="deleteChatMsg('${escapeAttr(msg.id)}')">🗑️</button>` : ''}
+          <span>${t}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+  scrollChatBottom();
+}
+
+function scrollChatBottom() {
+  const box = document.getElementById('chatMessages');
+  box.scrollTop = box.scrollHeight;
+}
+
+function setReply(id, senderName, snippet) {
+  replyTarget = { id, senderName, snippet };
+  document.getElementById('replyPreview').textContent = `Replying to ${senderName}: ${snippet}`;
+  document.getElementById('replyBar').classList.remove('hidden');
+}
+
+function cancelReply() {
+  replyTarget = null;
+  document.getElementById('replyBar').classList.add('hidden');
+}
+
+async function pushChatMessage(extra) {
+  const id = 'msg_' + Date.now() + '_' + Math.floor(Math.random() * 999);
+  const payload = Object.assign({
+    id, senderId: config.memberId, senderName: config.memberName, senderRole: config.memberRole,
+    timestamp: Date.now(), replyTo: replyTarget
+  }, extra);
+  cancelReply();
+  await fetch(`${config.firebaseUrl}/families/${config.familyCode}/chat/${id}.json`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+  });
+  lastRenderedChatCount = -1;
+  refreshAll(false);
+}
+
+async function sendChatText() {
+  const inp = document.getElementById('chatText');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  await pushChatMessage({ text: txt });
+}
+
+function sendChatPhoto(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 640;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      const compressed = c.toDataURL('image/jpeg', 0.65);
+      pushChatMessage({ image: compressed });
+      showToast('Photo sent!');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function toggleVoiceNote() {
+  const btn = document.getElementById('voiceBtn');
+  if (!isRecording) {
+    try {
+      if (hasAndroid) AndroidBridge.requestMediaPermissions();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => { pushChatMessage({ audio: reader.result }); showToast('Voice note sent!'); };
+        reader.readAsDataURL(blob);
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      btn.textContent = '⏹️';
+      btn.style.background = '#DC2626';
+      btn.style.color = '#fff';
+      showToast('Recording... Tap again to send');
+    } catch (e) {
+      showToast('Allow Microphone permission in Settings');
+    }
+  } else {
+    isRecording = false;
+    btn.textContent = '🎤';
+    btn.style.background = '';
+    btn.style.color = '';
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  }
+}
+
+async function deleteChatMsg(id) {
+  if (!confirm('Delete this message for everyone?')) return;
+  await fetch(`${config.firebaseUrl}/families/${config.familyCode}/chat/${id}.json`, { method: 'DELETE' });
+  lastRenderedChatCount = -1;
+  refreshAll(false);
+}
+
+// ================= WEBRTC WI-FI VOICE & VIDEO CALL =================
+const RTC_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+
+function waitForIceGathering(peer) {
+  return new Promise(resolve => {
+    if (peer.iceGatheringState === 'complete') { resolve(); return; }
+    const timer = setTimeout(resolve, 1800);
+    peer.addEventListener('icegatheringstatechange', () => {
+      if (peer.iceGatheringState === 'complete') { clearTimeout(timer); resolve(); }
+    });
+  });
+}
+
+async function startWebRtcCall(calleeId, calleeName, type) {
+  try {
+    if (hasAndroid) AndroidBridge.requestMediaPermissions();
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
+    pc = new RTCPeerConnection(RTC_CONFIG);
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+    const remoteVideo = document.getElementById('remoteVideo');
+    const localVideo = document.getElementById('localVideo');
+    const voiceAvatar = document.getElementById('voiceAvatar');
+
+    if (type === 'video') {
+      localVideo.srcObject = localStream;
+      localVideo.classList.remove('hidden');
+      voiceAvatar.classList.add('hidden');
+    } else {
+      localVideo.classList.add('hidden');
+      voiceAvatar.classList.remove('hidden');
+    }
+
+    pc.ontrack = (e) => { remoteVideo.srcObject = e.streams[0]; };
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    await waitForIceGathering(pc);
+
+    currentCallId = 'call_' + Date.now();
+    isCaller = true;
+    document.getElementById('callTitle').textContent = `${type === 'video' ? '📹 Video' : '🎙️ Voice'} Call — ${calleeName}`;
+    document.getElementById('callStatus').textContent = 'Ringing on Wi-Fi...';
+    document.getElementById('incomingControls').classList.add('hidden');
+    document.getElementById('activeCallControls').classList.remove('hidden');
+    document.getElementById('callOverlay').classList.remove('hidden');
+
+    await fetch(`${config.firebaseUrl}/families/${config.familyCode}/activeCall.json`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        callId: currentCallId, type, status: 'ringing',
+        callerId: config.memberId, callerName: config.memberName,
+        calleeId, calleeName, offer: pc.localDescription.toJSON(), timestamp: Date.now()
+      })
+    });
+  } catch (e) {
+    showToast('Camera/Mic permission required for Wi-Fi Call');
+    cleanupCallUi();
+  }
+}
+
+function handleCallSignaling() {
+  if (!activeCallData) return;
+  const age = Date.now() - (activeCallData.timestamp || 0);
+
+  // Incoming call for me
+  if (!currentCallId && activeCallData.status === 'ringing' && activeCallData.calleeId === config.memberId && age < 75000) {
+    currentCallId = activeCallData.callId;
+    isCaller = false;
+    document.getElementById('callTitle').textContent = `Incoming ${activeCallData.type === 'video' ? '📹 Video' : '🎙️ Voice'} Call`;
+    document.getElementById('callStatus').textContent = `${activeCallData.callerName} is calling over Wi-Fi...`;
+    document.getElementById('incomingControls').classList.remove('hidden');
+    document.getElementById('activeCallControls').classList.add('hidden');
+    document.getElementById('callOverlay').classList.remove('hidden');
+    return;
+  }
+
+  // Caller waiting for answer
+  if (isCaller && currentCallId && activeCallData.callId === currentCallId) {
+    if (activeCallData.status === 'connected' && activeCallData.answer && pc && !pc.currentRemoteDescription) {
+      pc.setRemoteDescription(new RTCSessionDescription(activeCallData.answer));
+      document.getElementById('callStatus').textContent = 'Connected (Wi-Fi)';
+    } else if (activeCallData.status === 'ended') {
+      showToast('Call ended');
+      cleanupCallUi();
+    }
+  }
+
+  // Callee sees caller ended call
+  if (!isCaller && currentCallId && activeCallData.callId === currentCallId && activeCallData.status === 'ended') {
+    showToast('Call ended');
+    cleanupCallUi();
+  }
+}
+
+async function acceptIncomingCall() {
+  if (!activeCallData || !activeCallData.offer) return;
+  try {
+    if (hasAndroid) AndroidBridge.requestMediaPermissions();
+    const isVideo = activeCallData.type === 'video';
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+    pc = new RTCPeerConnection(RTC_CONFIG);
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+    const remoteVideo = document.getElementById('remoteVideo');
+    const localVideo = document.getElementById('localVideo');
+    const voiceAvatar = document.getElementById('voiceAvatar');
+    if (isVideo) {
+      localVideo.srcObject = localStream;
+      localVideo.classList.remove('hidden');
+      voiceAvatar.classList.add('hidden');
+    } else {
+      localVideo.classList.add('hidden');
+      voiceAvatar.classList.remove('hidden');
+    }
+
+    pc.ontrack = (e) => { remoteVideo.srcObject = e.streams[0]; };
+    await pc.setRemoteDescription(new RTCSessionDescription(activeCallData.offer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    await waitForIceGathering(pc);
+
+    document.getElementById('incomingControls').classList.add('hidden');
+    document.getElementById('activeCallControls').classList.remove('hidden');
+    document.getElementById('callStatus').textContent = 'Connected (Wi-Fi)';
+
+    await fetch(`${config.firebaseUrl}/families/${config.familyCode}/activeCall.json`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'connected', answer: pc.localDescription.toJSON() })
+    });
+  } catch (e) {
+    showToast('Could not start call — allow Mic/Camera permission');
+    endCall();
+  }
+}
+
+function toggleMute() {
+  if (!localStream) return;
+  isMuted = !isMuted;
+  localStream.getAudioTracks().forEach(t => { t.enabled = !isMuted; });
+  document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🎤';
+}
+
+async function endCall() {
+  try {
+    await fetch(`${config.firebaseUrl}/families/${config.familyCode}/activeCall.json`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'ended' })
+    });
+  } catch (e) {}
+  cleanupCallUi();
+}
+
+function cleanupCallUi() {
+  if (pc) { try { pc.close(); } catch (e) {} pc = null; }
+  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+  currentCallId = null;
+  isCaller = false;
+  isMuted = false;
+  document.getElementById('remoteVideo').srcObject = null;
+  document.getElementById('localVideo').srcObject = null;
+  document.getElementById('callOverlay').classList.add('hidden');
+}
+
+// ================= CONTACTS & SETTINGS =================
 function renderEmergencyContacts() {
   document.getElementById('emergencyContacts').innerHTML = EMERGENCY_LIST.map(c => `
     <div class="contact-item">
-      <div>
-        <strong>${escapeHtml(c.name)}</strong>
-        <div class="sub">${escapeHtml(c.phone)}</div>
-      </div>
+      <div><strong>${escapeHtml(c.name)}</strong><div class="sub">${escapeHtml(c.phone)}</div></div>
       <button class="btn btn-danger btn-sm" onclick="callNum('${c.phone}')">📞 Call</button>
     </div>
   `).join('');
 }
 
-function toggleAddContact() {
-  document.getElementById('addContactBox').classList.toggle('hidden');
-}
+function toggleAddContact() { document.getElementById('addContactBox').classList.toggle('hidden'); }
 
 async function saveSharedContact() {
   const name = document.getElementById('cName').value.trim();
@@ -631,8 +1152,7 @@ async function saveSharedContact() {
   if (!name || !phone) { showToast('Enter name and phone'); return; }
   const id = 'c_' + Date.now();
   await fetch(`${config.firebaseUrl}/families/${config.familyCode}/contacts/${id}.json`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id, name, phone, cat, addedBy: config.memberName })
   });
   document.getElementById('cName').value = '';
@@ -651,18 +1171,13 @@ async function deleteSharedContact(id) {
 
 function renderContacts() {
   const q = (document.getElementById('contactSearch').value || '').toLowerCase();
-  const famList = Object.values(membersData).map(m => ({
-    id: m.id, name: m.name, phone: m.phone, cat: m.role || 'Family', isMember: true
-  }));
+  const famList = Object.values(membersData).map(m => ({ id: m.id, name: m.name, phone: m.phone, cat: m.role || 'Family', isMember: true }));
   const customList = Object.values(contactsData).map(c => ({ ...c, isMember: false }));
   const all = [...famList, ...customList].filter(c =>
     (c.name || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || (c.cat || '').toLowerCase().includes(q)
   );
   const el = document.getElementById('sharedContactsList');
-  if (!all.length) {
-    el.innerHTML = '<p class="sub">No contacts found. Tap "+ Add Contact" to save shared numbers.</p>';
-    return;
-  }
+  if (!all.length) { el.innerHTML = '<p class="sub">No contacts found.</p>'; return; }
   el.innerHTML = all.map(c => `
     <div class="contact-item">
       <div style="flex:1;">
@@ -680,14 +1195,11 @@ function renderContacts() {
 
 function renderPermissions() {
   const el = document.getElementById('permList');
-  if (!hasAndroid) {
-    el.innerHTML = '<p class="sub">Permissions are managed inside the Android APK.</p>';
-    return;
-  }
+  if (!hasAndroid) { el.innerHTML = '<p class="sub">Permissions are managed inside the Android APK.</p>'; return; }
   const p = JSON.parse(AndroidBridge.getPermissionStatus());
   el.innerHTML = `
     <div class="perm-row">
-      <div><strong>Location Access</strong><div class="sub">Required to show live location</div></div>
+      <div><strong>Location Access</strong><div class="sub">Required for live location</div></div>
       ${p.location ? '<span class="pill good">✓ Allowed</span>' : '<button class="btn btn-primary btn-sm" onclick="AndroidBridge.requestCorePermissions()">Allow</button>'}
     </div>
     <div class="perm-row">
@@ -695,7 +1207,15 @@ function renderPermissions() {
       ${p.backgroundLocation ? '<span class="pill good">✓ Allowed</span>' : '<button class="btn btn-primary btn-sm" onclick="AndroidBridge.requestBackgroundLocation()">Allow</button>'}
     </div>
     <div class="perm-row">
-      <div><strong>Notifications</strong><div class="sub">For background sync & SOS alerts</div></div>
+      <div><strong>Camera & Microphone</strong><div class="sub">For Wi-Fi Voice/Video Call & Voice Notes</div></div>
+      ${p.cameraMic ? '<span class="pill good">✓ Allowed</span>' : '<button class="btn btn-primary btn-sm" onclick="AndroidBridge.requestMediaPermissions()">Allow</button>'}
+    </div>
+    <div class="perm-row">
+      <div><strong>Usage Access (Screen Time)</strong><div class="sub">Shows today's screen time & top apps</div></div>
+      ${p.usageAccess ? '<span class="pill good">✓ Allowed</span>' : '<button class="btn btn-primary btn-sm" onclick="AndroidBridge.openUsageAccessSettings()">Allow</button>'}
+    </div>
+    <div class="perm-row">
+      <div><strong>Notifications</strong><div class="sub">For incoming Wi-Fi calls & SOS alerts</div></div>
       ${p.notifications ? '<span class="pill good">✓ Allowed</span>' : '<button class="btn btn-primary btn-sm" onclick="AndroidBridge.requestCorePermissions()">Allow</button>'}
     </div>
     <div class="perm-row">
@@ -707,68 +1227,33 @@ function renderPermissions() {
 
 function updateInterval() {
   const val = Number(document.getElementById('setInterval').value);
-  if (hasAndroid) {
-    config = JSON.parse(AndroidBridge.saveConfig(config.firebaseUrl, config.familyCode, config.memberName, config.memberPhone, config.memberRole, val));
-  } else {
-    config.syncIntervalMin = val;
-    localStorage.setItem('fc_web_config', JSON.stringify(config));
-  }
+  if (hasAndroid) config = JSON.parse(AndroidBridge.saveConfig(config.firebaseUrl, config.familyCode, config.memberName, config.memberPhone, config.memberRole, val));
+  else { config.syncIntervalMin = val; localStorage.setItem('fc_web_config', JSON.stringify(config)); }
   showToast(`Sync interval set to ${val} minutes`);
 }
 
 function shareInvite() {
   const token = btoa(JSON.stringify({ url: config.firebaseUrl, code: config.familyCode }));
-  const text = `Join our FamilyConnect app!
-
-1. Open FamilyConnect app
-2. Tap "Paste Family Invite Code"
-3. Paste this code:
+  const text = `Join FamilyConnect!
 FCINVITE:${token}`;
-  if (hasAndroid) AndroidBridge.shareText(text);
-  else prompt('Copy and share this invite:', text);
+  if (hasAndroid) AndroidBridge.shareText(text); else prompt('Copy invite:', text);
 }
 
 function logoutApp() {
   if (!confirm('Leave this family group on this phone?')) return;
-  if (hasAndroid) AndroidBridge.logout();
-  else localStorage.removeItem('fc_web_config');
+  if (hasAndroid) AndroidBridge.logout(); else localStorage.removeItem('fc_web_config');
   location.reload();
 }
 
-function callNum(num) {
-  if (!num) return;
-  if (hasAndroid) AndroidBridge.makeCall(num);
-  else window.location.href = 'tel:' + num;
-}
+function callNum(num) { if (!num) return; if (hasAndroid) AndroidBridge.makeCall(num); else window.location.href = 'tel:' + num; }
+function waNum(num) { if (!num) return; if (hasAndroid) AndroidBridge.openWhatsApp(num, 'Hi'); else window.open('https://wa.me/' + num.replace(/[^0-9]/g, ''), '_blank'); }
+function openMap(lat, lng, label) { if (hasAndroid) AndroidBridge.openMaps(lat, lng, label); else window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank'); }
+function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escapeAttr(s) { return String(s).replace(/'/g, "\'").replace(/"/g, '&quot;'); }
 
-function waNum(num) {
-  if (!num) return;
-  if (hasAndroid) AndroidBridge.openWhatsApp(num, 'Hi');
-  else window.open('https://wa.me/' + num.replace(/[^0-9]/g, ''), '_blank');
-}
+window.onAndroidResume = function() { renderPermissions(); refreshAll(false); };
 
-function openMap(lat, lng, label) {
-  if (hasAndroid) AndroidBridge.openMaps(lat, lng, label);
-  else window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escapeAttr(s) {
-  return String(s).replace(/'/g, "\'").replace(/"/g, '&quot;');
-}
-
-window.onAndroidResume = function() {
-  renderPermissions();
-  refreshAll(false);
-};
-
-// Boot
-if (localStorage.getItem('fc_dark') === '1') {
-  document.body.classList.add('dark');
-  document.getElementById('themeBtn').textContent = '☀️';
-}
+if (localStorage.getItem('fc_dark') === '1') { document.body.classList.add('dark'); document.getElementById('themeBtn').textContent = '☀️'; }
 applyLang();
 loadConfig();
 if (config.isConfigured) {
