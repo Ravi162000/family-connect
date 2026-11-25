@@ -275,11 +275,10 @@
       </div>
     </details>
 
-    <div class="field"><label>Your Name *</label><input id="inName" type="text" placeholder="e.g. Ravi / Papa / Mummy" /></div>
-    <div class="field"><label>Phone Number *</label><input id="inPhone" type="tel" placeholder="e.g. 9876543210" /></div>
+    <div class="field"><label>Your Name *</label><input id="inName" type="text" placeholder="e.g. Ravi / Ravi Tablet / Papa" /></div>
     <div class="field">
       <label>Relation / Role</label>
-      <select id="inRole">
+      <select id="inRole" onchange="onRoleChange()">
         <option value="Admin">Admin / Head</option>
         <option value="Papa">Papa</option>
         <option value="Mummy">Mummy</option>
@@ -288,7 +287,12 @@
         <option value="Wife">Wife</option>
         <option value="Husband">Husband</option>
         <option value="Family" selected>Family Member</option>
+        <option value="Other">Other / Tablet (Extra Device)</option>
       </select>
+    </div>
+    <div class="field">
+      <label id="phoneLabel">Phone Number *</label>
+      <input id="inPhone" type="tel" placeholder="e.g. 9876543210" />
     </div>
     <button class="btn btn-primary" style="width:100%;padding:13px;" onclick="saveSetup()">Save & Join Family</button>
   </div>
@@ -433,6 +437,18 @@
   <button id="navSettings" onclick="switchTab('settings')"><span class="ico">⚙️</span><span data-i18n="tabSettings">Settings</span></button>
 </div>
 
+<!-- DELETE MEMBER CONFIRMATION MODAL -->
+<div id="delMemberModal" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h3>🗑️ Delete Member Card</h3>
+    <p id="delMemberText">Kya aap is member card ko delete karna chahte hain?</p>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="closeDelMemberModal()">No (Cancel)</button>
+      <button class="btn btn-danger" onclick="confirmDeleteMember()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
 <!-- RING CONFIRMATION MODAL (YES / NO) -->
 <div id="ringModal" class="modal-backdrop hidden">
   <div class="modal-card">
@@ -556,8 +572,12 @@ function saveSetup() {
     showToast('Please enter a valid Firebase Realtime DB URL');
     return;
   }
-  if (code.length < 4 || !name || !phone) {
-    showToast('Please fill Name and Phone');
+  if (code.length < 4 || !name) {
+    showToast('Please enter your Name');
+    return;
+  }
+  if (role !== 'Other' && !phone) {
+    showToast('Please enter Phone Number (or select Other / Tablet)');
     return;
   }
 
@@ -572,12 +592,73 @@ function saveSetup() {
   refreshAll(true);
 }
 
+function onRoleChange() {
+  const role = document.getElementById('inRole').value;
+  const lbl = document.getElementById('phoneLabel');
+  const inp = document.getElementById('inPhone');
+  if (role === 'Other') {
+    lbl.textContent = 'Phone Number (Optional)';
+    inp.placeholder = 'Optional (blank chhod sakte ho)';
+  } else {
+    lbl.textContent = 'Phone Number *';
+    inp.placeholder = 'e.g. 9876543210';
+  }
+}
+
+async function autoCleanDuplicates(myStatus) {
+  try {
+    const res = await fetch(`${config.firebaseUrl}/families/${config.familyCode}/members.json`);
+    const existing = await res.json();
+    if (!existing) return;
+    const myPhone = (myStatus.phone || '').replace(/[^0-9]/g, '');
+    const myModel = (myStatus.deviceModel || '').trim().toLowerCase();
+    const myName = (myStatus.name || '').trim().toLowerCase();
+
+    for (const [id, m] of Object.entries(existing)) {
+      if (!m || id === config.memberId) continue;
+      const mPhone = (m.phone || '').replace(/[^0-9]/g, '');
+      const mModel = (m.deviceModel || '').trim().toLowerCase();
+      const mName = (m.name || '').trim().toLowerCase();
+
+      const samePhoneAndDevice = myPhone.length >= 8 && mPhone === myPhone && myModel && mModel === myModel;
+      const sameNameAndDevice = !myPhone && myName && mName === myName && myModel && mModel === myModel;
+      if (samePhoneAndDevice || sameNameAndDevice) {
+        await fetch(`${config.firebaseUrl}/families/${config.familyCode}/members/${id}.json`, { method: 'DELETE' });
+      }
+    }
+  } catch (e) {}
+}
+
+let pendingDeleteMember = null;
+function askDeleteMember(id, name) {
+  pendingDeleteMember = { id, name };
+  document.getElementById('delMemberText').textContent =
+    `Kya aap "${name}" ka ye card family list se delete karna chahte hain?`;
+  document.getElementById('delMemberModal').classList.remove('hidden');
+}
+
+function closeDelMemberModal() {
+  pendingDeleteMember = null;
+  document.getElementById('delMemberModal').classList.add('hidden');
+}
+
+async function confirmDeleteMember() {
+  if (!pendingDeleteMember) return;
+  const target = pendingDeleteMember;
+  closeDelMemberModal();
+  await fetch(`${config.firebaseUrl}/families/${config.familyCode}/members/${target.id}.json`, { method: 'DELETE' });
+  delete membersData[target.id];
+  renderMembers();
+  showToast(`"${target.name}" card deleted!`);
+}
+
 function openSetupEdit() {
   document.getElementById('inFirebase').value = config.firebaseUrl || '';
   document.getElementById('inCode').value = config.familyCode || '';
   document.getElementById('inName').value = config.memberName || '';
   document.getElementById('inPhone').value = config.memberPhone || '';
   document.getElementById('inRole').value = config.memberRole || 'Family';
+  onRoleChange();
   document.getElementById('mainView').classList.add('hidden');
   document.getElementById('bottomNav').classList.add('hidden');
   document.getElementById('setupView').classList.remove('hidden');
@@ -614,6 +695,7 @@ async function uploadOwnStatus() {
     deviceModel: 'Web Browser', lat: null, lng: null, accuracy: 0, address: 'Open in Android APK for GPS',
     screenTimeMin: -1, topApps: [], lastSeen: Date.now()
   };
+  await autoCleanDuplicates(status);
   await fetch(`${config.firebaseUrl}/families/${config.familyCode}/members/${config.memberId}.json`, {
     method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(status)
   });
@@ -791,7 +873,10 @@ function renderMembers() {
               <div class="sub">${escapeHtml(m.phone || '')} • ${escapeHtml(m.deviceModel || '')}</div>
             </div>
           </div>
-          <span class="pill ${onlineClass}">${onlineText}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="pill ${onlineClass}">${onlineText}</span>
+            ${!isMe ? `<button class="btn btn-outline btn-sm" style="padding:4px 8px;" onclick="askDeleteMember('${escapeAttr(m.id)}','${escapeAttr(m.name || 'Member')}')" title="Delete Card">🗑️</button>` : ''}
+          </div>
         </div>
 
         <div class="pills">
@@ -822,8 +907,8 @@ function renderMembers() {
           ${!isMe ? `<button class="btn btn-primary" onclick="startWebRtcCall('${escapeAttr(m.id)}','${escapeAttr(m.name || 'Member')}','voice')">🎙️ Wi-Fi Call</button>` : ''}
           ${!isMe ? `<button class="btn btn-purple" onclick="startWebRtcCall('${escapeAttr(m.id)}','${escapeAttr(m.name || 'Member')}','video')">📹 Video</button>` : ''}
           ${!isMe ? `<button class="btn btn-danger" onclick="ringMemberPhone('${escapeAttr(m.id)}','${escapeAttr(m.name || 'Member')}')">🔔 Ring</button>` : ''}
-          <button class="btn btn-outline" onclick="callNum('${escapeAttr(m.phone || '')}')">📞 SIM</button>
-          <button class="btn btn-green" onclick="waNum('${escapeAttr(m.phone || '')}')">💬 WA</button>
+          ${m.phone ? `<button class="btn btn-outline" onclick="callNum('${escapeAttr(m.phone)}')">📞 SIM</button>` : ''}
+          ${m.phone ? `<button class="btn btn-green" onclick="waNum('${escapeAttr(m.phone)}')">💬 WA</button>` : ''}
         </div>
       </div>
     `;
@@ -1171,7 +1256,7 @@ async function deleteSharedContact(id) {
 
 function renderContacts() {
   const q = (document.getElementById('contactSearch').value || '').toLowerCase();
-  const famList = Object.values(membersData).map(m => ({ id: m.id, name: m.name, phone: m.phone, cat: m.role || 'Family', isMember: true }));
+  const famList = Object.values(membersData).filter(m => m.phone).map(m => ({ id: m.id, name: m.name, phone: m.phone, cat: m.role || 'Family', isMember: true }));
   const customList = Object.values(contactsData).map(c => ({ ...c, isMember: false }));
   const all = [...famList, ...customList].filter(c =>
     (c.name || '').toLowerCase().includes(q) || (c.phone || '').includes(q) || (c.cat || '').toLowerCase().includes(q)
