@@ -312,7 +312,7 @@
           <strong style="font-size:13px;">Live Sync Active</strong>
           <div class="sub" id="lastSyncText">Updating...</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="refreshAll(true)">↻ Refresh</button>
+        <button class="btn btn-primary btn-sm" id="refreshNowBtn" onclick="refreshAllNow()">↻ Refresh Now</button>
       </div>
     </div>
 
@@ -425,6 +425,7 @@
   </div>
   <div class="call-controls hidden" id="activeCallControls">
     <button class="call-circle" id="muteBtn" style="background:#334155;" onclick="toggleMute()">🎤</button>
+    <button class="call-circle" id="speakerBtn" style="background:#1D4ED8;" onclick="toggleSpeaker()">🔊</button>
     <button class="call-circle" style="background:#DC2626;" onclick="endCall()">📵</button>
   </div>
 </div>
@@ -817,14 +818,49 @@ async function stopRemoteRing() {
   showToast('Phone ring band kar diya gaya!');
 }
 
+let lastUiRingId = '';
+let isSpeakerOn = true;
+
+async function refreshAllNow() {
+  const btn = document.getElementById('refreshNowBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Syncing...'; }
+  try {
+    await fetch(`${config.firebaseUrl}/families/${config.familyCode}/refreshRequest.json`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reqId: 'ref_' + Date.now(), senderId: config.memberId, timestamp: Date.now() })
+    });
+    await refreshAll(true);
+    showToast('Updating all family phones...');
+    setTimeout(async () => {
+      await refreshAll(false);
+      if (btn) { btn.disabled = false; btn.textContent = '↻ Refresh Now'; }
+      showToast('All family statuses refreshed!');
+    }, 5500);
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = '↻ Refresh Now'; }
+    showToast('Refresh failed — check internet');
+  }
+}
+
 function renderRingBanner() {
   const box = document.getElementById('ringBanner');
   if (!ringData || !ringData.active || (Date.now() - (ringData.timestamp || 0)) > 60000) {
     box.classList.add('hidden');
+    if (lastUiRingId && hasAndroid && AndroidBridge.stopRinging) {
+      AndroidBridge.stopRinging();
+      lastUiRingId = '';
+    }
     return;
   }
   box.classList.remove('hidden');
-  const label = ringData.targetId === config.memberId
+  const isTarget = ringData.targetId === config.memberId;
+  if (isTarget && ringData.ringId && ringData.ringId !== lastUiRingId) {
+    lastUiRingId = ringData.ringId;
+    if (hasAndroid && AndroidBridge.startRinging) {
+      AndroidBridge.startRinging(ringData.senderName || 'Family');
+    }
+  }
+  const label = isTarget
     ? `🔔 ${escapeHtml(ringData.senderName || 'Family')} is ringing your phone!`
     : `🔔 Ringing ${escapeHtml(ringData.targetName || 'member')}'s phone...`;
   box.innerHTML = `
@@ -1054,30 +1090,67 @@ async function deleteChatMsg(id) {
   refreshAll(false);
 }
 
-// ================= WEBRTC WI-FI VOICE & VIDEO CALL =================
-const RTC_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+// ================= WEBRTC WI-FI VOICE & VIDEO CALL (v1.4 FIXED) =================
+const RTC_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' }
+  ]
+};
+let addedCandidateKeys = new Set();
 
-function waitForIceGathering(peer) {
-  return new Promise(resolve => {
-    if (peer.iceGatheringState === 'complete') { resolve(); return; }
-    const timer = setTimeout(resolve, 1800);
-    peer.addEventListener('icegatheringstatechange', () => {
-      if (peer.iceGatheringState === 'complete') { clearTimeout(timer); resolve(); }
-    });
-  });
+function ensureMediaPermReady() {
+  if (hasAndroid && AndroidBridge.hasMediaPermissions && !AndroidBridge.hasMediaPermissions()) {
+    AndroidBridge.requestMediaPermissions();
+    showToast('Pehle Camera & Mic Allow karein, fir dubara Call dabayein');
+    return false;
+  }
+  return true;
+}
+
+function attachIceTrickle(peer, sideKey) {
+  peer.onicecandidate = async (e) => {
+    if (!e.candidate || !currentCallId) return;
+    try {
+      const cid = 'c_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
+      await fetch(`${config.firebaseUrl}/families/${config.familyCode}/activeCall/${sideKey}/${cid}.json`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(e.candidate.toJSON())
+      });
+    } catch (err) {}
+  };
+  peer.onconnectionstatechange = () => {
+    const st = peer.connectionState;
+    if (st === 'connected') document.getElementById('callStatus').textContent = 'Connected (Wi-Fi Live)';
+    else if (st === 'connecting') document.getElementById('callStatus').textContent = 'Connecting audio/video...';
+    else if (st === 'failed') document.getElementById('callStatus').textContent = 'Network blocked P2P — try same Wi-Fi or SIM';
+  };
+}
+
+function applyRemoteCandidates(candMap) {
+  if (!pc || !pc.currentRemoteDescription || !candMap) return;
+  for (const [k, c] of Object.entries(candMap)) {
+    if (!c || addedCandidateKeys.has(k)) continue;
+    addedCandidateKeys.add(k);
+    pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
+  }
 }
 
 async function startWebRtcCall(calleeId, calleeName, type) {
+  if (!ensureMediaPermReady()) return;
   try {
-    if (hasAndroid) AndroidBridge.requestMediaPermissions();
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
+    isSpeakerOn = true;
+    if (hasAndroid && AndroidBridge.setCallAudioMode) AndroidBridge.setCallAudioMode(true, true);
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' ? { facingMode: 'user' } : false });
     pc = new RTCPeerConnection(RTC_CONFIG);
+    addedCandidateKeys = new Set();
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
     const remoteVideo = document.getElementById('remoteVideo');
     const localVideo = document.getElementById('localVideo');
     const voiceAvatar = document.getElementById('voiceAvatar');
-
     if (type === 'video') {
       localVideo.srcObject = localStream;
       localVideo.classList.remove('hidden');
@@ -1087,14 +1160,19 @@ async function startWebRtcCall(calleeId, calleeName, type) {
       voiceAvatar.classList.remove('hidden');
     }
 
-    pc.ontrack = (e) => { remoteVideo.srcObject = e.streams[0]; };
-
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    await waitForIceGathering(pc);
+    pc.ontrack = (e) => {
+      remoteVideo.srcObject = e.streams[0];
+      remoteVideo.muted = false;
+      remoteVideo.play().catch(() => {});
+    };
 
     currentCallId = 'call_' + Date.now();
     isCaller = true;
+    attachIceTrickle(pc, 'callerCandidates');
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
     document.getElementById('callTitle').textContent = `${type === 'video' ? '📹 Video' : '🎙️ Voice'} Call — ${calleeName}`;
     document.getElementById('callStatus').textContent = 'Ringing on Wi-Fi...';
     document.getElementById('incomingControls').classList.add('hidden');
@@ -1110,7 +1188,7 @@ async function startWebRtcCall(calleeId, calleeName, type) {
       })
     });
   } catch (e) {
-    showToast('Camera/Mic permission required for Wi-Fi Call');
+    showToast('Call error: ' + (e.message || 'Check Mic/Camera permission'));
     cleanupCallUi();
   }
 }
@@ -1119,7 +1197,6 @@ function handleCallSignaling() {
   if (!activeCallData) return;
   const age = Date.now() - (activeCallData.timestamp || 0);
 
-  // Incoming call for me
   if (!currentCallId && activeCallData.status === 'ringing' && activeCallData.calleeId === config.memberId && age < 75000) {
     currentCallId = activeCallData.callId;
     isCaller = false;
@@ -1131,31 +1208,42 @@ function handleCallSignaling() {
     return;
   }
 
-  // Caller waiting for answer
   if (isCaller && currentCallId && activeCallData.callId === currentCallId) {
-    if (activeCallData.status === 'connected' && activeCallData.answer && pc && !pc.currentRemoteDescription) {
-      pc.setRemoteDescription(new RTCSessionDescription(activeCallData.answer));
-      document.getElementById('callStatus').textContent = 'Connected (Wi-Fi)';
+    if (activeCallData.status === 'connected' && activeCallData.answer && pc) {
+      if (!pc.currentRemoteDescription) {
+        pc.setRemoteDescription(new RTCSessionDescription(activeCallData.answer))
+          .then(() => applyRemoteCandidates(activeCallData.calleeCandidates))
+          .catch(() => {});
+        document.getElementById('callStatus').textContent = 'Connecting audio/video...';
+      } else {
+        applyRemoteCandidates(activeCallData.calleeCandidates);
+      }
     } else if (activeCallData.status === 'ended') {
       showToast('Call ended');
       cleanupCallUi();
     }
   }
 
-  // Callee sees caller ended call
-  if (!isCaller && currentCallId && activeCallData.callId === currentCallId && activeCallData.status === 'ended') {
-    showToast('Call ended');
-    cleanupCallUi();
+  if (!isCaller && currentCallId && activeCallData.callId === currentCallId) {
+    if (activeCallData.status === 'ended') {
+      showToast('Call ended');
+      cleanupCallUi();
+    } else if (pc && pc.currentRemoteDescription) {
+      applyRemoteCandidates(activeCallData.callerCandidates);
+    }
   }
 }
 
 async function acceptIncomingCall() {
   if (!activeCallData || !activeCallData.offer) return;
+  if (!ensureMediaPermReady()) return;
   try {
-    if (hasAndroid) AndroidBridge.requestMediaPermissions();
+    isSpeakerOn = true;
+    if (hasAndroid && AndroidBridge.setCallAudioMode) AndroidBridge.setCallAudioMode(true, true);
     const isVideo = activeCallData.type === 'video';
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo ? { facingMode: 'user' } : false });
     pc = new RTCPeerConnection(RTC_CONFIG);
+    addedCandidateKeys = new Set();
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
     const remoteVideo = document.getElementById('remoteVideo');
@@ -1170,22 +1258,29 @@ async function acceptIncomingCall() {
       voiceAvatar.classList.remove('hidden');
     }
 
-    pc.ontrack = (e) => { remoteVideo.srcObject = e.streams[0]; };
+    pc.ontrack = (e) => {
+      remoteVideo.srcObject = e.streams[0];
+      remoteVideo.muted = false;
+      remoteVideo.play().catch(() => {});
+    };
+
+    attachIceTrickle(pc, 'calleeCandidates');
     await pc.setRemoteDescription(new RTCSessionDescription(activeCallData.offer));
+    applyRemoteCandidates(activeCallData.callerCandidates);
+
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-    await waitForIceGathering(pc);
 
     document.getElementById('incomingControls').classList.add('hidden');
     document.getElementById('activeCallControls').classList.remove('hidden');
-    document.getElementById('callStatus').textContent = 'Connected (Wi-Fi)';
+    document.getElementById('callStatus').textContent = 'Connecting audio/video...';
 
     await fetch(`${config.firebaseUrl}/families/${config.familyCode}/activeCall.json`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'connected', answer: pc.localDescription.toJSON() })
     });
   } catch (e) {
-    showToast('Could not start call — allow Mic/Camera permission');
+    showToast('Call accept error: ' + (e.message || 'Check Mic/Camera permission'));
     endCall();
   }
 }
@@ -1195,6 +1290,13 @@ function toggleMute() {
   isMuted = !isMuted;
   localStream.getAudioTracks().forEach(t => { t.enabled = !isMuted; });
   document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🎤';
+}
+
+function toggleSpeaker() {
+  isSpeakerOn = !isSpeakerOn;
+  if (hasAndroid && AndroidBridge.setCallAudioMode) AndroidBridge.setCallAudioMode(true, isSpeakerOn);
+  document.getElementById('speakerBtn').textContent = isSpeakerOn ? '🔊' : '🔈';
+  showToast(isSpeakerOn ? 'Speaker ON' : 'Earpiece ON');
 }
 
 async function endCall() {
@@ -1208,8 +1310,10 @@ async function endCall() {
 }
 
 function cleanupCallUi() {
+  if (hasAndroid && AndroidBridge.setCallAudioMode) AndroidBridge.setCallAudioMode(false, false);
   if (pc) { try { pc.close(); } catch (e) {} pc = null; }
   if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+  addedCandidateKeys = new Set();
   currentCallId = null;
   isCaller = false;
   isMuted = false;
